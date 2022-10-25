@@ -68,6 +68,7 @@ class PostFormTests(TestCase):
             'group': self.group.id,
             'image': self.uploaded,
         }
+        print(form_data)
 
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -77,9 +78,9 @@ class PostFormTests(TestCase):
 
         created_post = Post.objects.latest('pk')
 
-        # self.assertRedirects(response, reverse(
-        #     'posts:profile', kwargs={'username': created_post.author})
-        # )
+        self.assertRedirects(response, reverse(
+            'posts:profile', kwargs={'username': created_post.author})
+        )
         self.assertEqual(Post.objects.count(), post_create + 1)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(created_post.author, self.post.author)
@@ -119,6 +120,7 @@ class PostFormTests(TestCase):
             'group': group_2.id,
             'image': self.uploaded,
         }
+        print(form_data)
         response = self.authorized_client.post(reverse(
             'posts:post_edit', kwargs={'post_id': self.post.id}),
             data=form_data,
@@ -126,9 +128,9 @@ class PostFormTests(TestCase):
         )
         edited_post = Post.objects.latest('pk')
 
-        # self.assertRedirects(response, reverse(
-        #     'posts:post_detail', kwargs={'post_id': self.post.id})
-        # )
+        self.assertRedirects(response, reverse(
+            'posts:post_detail', kwargs={'post_id': self.post.id})
+        )
         self.assertEqual(Post.objects.count(), post_create)
         self.assertEqual(edited_post.author, self.post.author)
         self.assertEqual(edited_post.text, form_data['text'])
