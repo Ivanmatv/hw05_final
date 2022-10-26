@@ -50,6 +50,7 @@ def profile(request, username):
         'author': author,
         'page_obj': page_obj,
         'profile': profile,
+        'following': following,
     }
     return render(request, 'posts/profile.html', context)
 
