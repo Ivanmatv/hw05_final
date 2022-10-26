@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django import forms
 from django.core.paginator import Page
 from django.core.cache import cache
+from http import HTTPStatus
 
 from posts.models import Group, Post, User, Comment
 
@@ -203,3 +204,11 @@ class PostPagesTests(TestCase):
                 with self.subTest(page=page):
                     response = self.authorized_client.get(page + postsurls)
                     self.assertEqual(len(response.context['page_obj']), posts)
+
+    def test_page_not_found(self):
+        response = self.client.get('/nonexist-page/')
+        self.assertTemplateUsed(response, 'core/404.html')
+        self.assertEqual(
+                    response.status_code,
+                    HTTPStatus.NOT_FOUND
+                )
