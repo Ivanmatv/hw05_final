@@ -212,6 +212,7 @@ class PostPagesTests(TestCase):
         self.assertTemplateUsed(response, 'core/404.html')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
+
     def test_follow(self):
         """Проверка подписки на автора """
         follower_count = Follow.objects.count()
