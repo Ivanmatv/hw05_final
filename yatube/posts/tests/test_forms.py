@@ -90,11 +90,7 @@ class PostFormTests(TestCase):
         self.assertEqual(created_post.author, self.post.author)
         self.assertEqual(created_post.text, form_data['text'])
         self.assertEqual(created_post.group_id, form_data['group'])
-        self.assertTrue(
-            Post.objects.filter(
-                image='posts/small.gif'
-            ).exists()
-        )
+        self.assertEqual(created_post.image, form_data['image'])
 
     def test_guest_create_post(self):
         post_create = Post.objects.count()

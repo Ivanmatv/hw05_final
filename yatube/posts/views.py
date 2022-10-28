@@ -45,11 +45,9 @@ def profile(request, username):
         following = Follow.objects.filter(
             user=request.user, author=author
         ).exists()
-    profile = author
     context = {
         'author': author,
         'page_obj': page_obj,
-        'profile': profile,
         'following': following,
     }
     return render(request, 'posts/profile.html', context)
@@ -94,7 +92,6 @@ def post_edit(request, post_id):
         form.save()
         return redirect('posts:post_detail', post_id=post_id)
     context = {
-        'post': post,
         'form': form,
         'is_edit': True,
     }
