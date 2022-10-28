@@ -71,7 +71,7 @@ def post_create(request):
     form = PostForm(
         request.POST or None,
         files=request.FILES or None
-        )
+    )
     if form.is_valid():
         form = form.save(commit=False)
         form.author = request.user
