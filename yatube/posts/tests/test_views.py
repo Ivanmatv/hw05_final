@@ -210,9 +210,7 @@ class PostPagesTests(TestCase):
     def test_page_not_found(self):
         response = self.client.get('/nonexist-page/')
         self.assertTemplateUsed(response, 'core/404.html')
-        self.assertEqual(
-                         response.status_code,
-                         HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_follow(self):
         """Проверка подписки на автора """
