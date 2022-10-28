@@ -3,13 +3,16 @@
 
 {%block title%}
  Записи авторов
-{% block content %}    
+{%endblock %}
+
+{% block content %}
+{% include 'posts/includes/switcher.html' %}    
   {% for post in page_obj %}
   <article>
     <ul>
       <li>
         Автор: {{ post.author.get_full_name }}
-        <a href="{% url 'posts:profile' post.author.username %}">все посты пользователя</a>
+        <a href="{% url 'posts:profile' post.author.username %}"> Все посты пользователя</a>
       </li>
       <li>
         Дата публикации: {{ post.pub_date|date:"d E Y" }}

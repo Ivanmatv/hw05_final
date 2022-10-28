@@ -77,8 +77,6 @@ def post_create(request):
         form.author = request.user
         form.save()
         return redirect('posts:profile', request.user)
-    # print(form.is_valid())
-    # print(form.errors)
     return render(request, 'posts/create_post.html', {'form': form})
 
 
@@ -100,8 +98,6 @@ def post_edit(request, post_id):
         'form': form,
         'is_edit': True,
     }
-    # print(form.is_valid())
-    # print(form.errors)
     return render(request, 'posts/create_post.html', context)
 
 
@@ -130,11 +126,11 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    if (author != request.user
-            and not Follow.objects.filter(
-                user=request.user, author=author
-            ).exists()):
-        Follow.objects.create(user=request.user, author=author)
+    if request.user != author:
+        Follow.objects.get_or_create(
+            user=request.user,
+            author=author
+        )
     return redirect('posts:profile', username)
 
 

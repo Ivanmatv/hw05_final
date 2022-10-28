@@ -10,7 +10,7 @@ from django.core.paginator import Page
 from django.core.cache import cache
 from http import HTTPStatus
 
-from posts.models import Group, Post, User, Comment
+from posts.models import Group, Post, User, Comment, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -60,6 +60,8 @@ class PostPagesTests(TestCase):
         self.authorized_client = Client()
         # Авторизуем клиента
         self.authorized_client.force_login(self.user)
+        # Создаём нового автора
+        self.new_author = User.objects.create_user(username='new_author')
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -212,3 +214,34 @@ class PostPagesTests(TestCase):
                     response.status_code,
                     HTTPStatus.NOT_FOUND
                 )
+
+    def test_follow(self):
+        """Проверка подписки на автора """
+        follower_count = Follow.objects.count()
+        self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.new_author}))
+        self.assertEqual(Follow.objects.count(), follower_count + 1)
+
+    def test_unfollow(self):
+        """Проверка отписки на автора """
+        self.authorized_client.get(reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': self.new_author}))
+        self.assertEqual(Follow.objects.count(), 0)
+
+    def test_following_users_corect_content(self):
+        """Проверка отображения новых записей в ленте подписок"""
+        post = Post.objects.create(
+            text=self.post.text,
+            author=self.new_author,
+        )
+        follow = Follow.objects.create(
+            user=self.user,
+            author=self.new_author
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(response.context['page_obj'][0], post)
+        follow.delete()
+        response_2 = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(len(response_2.context['page_obj']), 0)

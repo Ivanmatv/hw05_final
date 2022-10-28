@@ -27,11 +27,11 @@ class PostFormTests(TestCase):
              b'\x02\x00\x01\x00\x00\x02\x02\x0C'
              b'\x0A\x00\x3B'
         )
-        # cls.uploaded = SimpleUploadedFile(
-        #     name='small.gif',
-        #     content=cls.small_gif,
-        #     content_type='image/gif'
-        # )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -41,6 +41,7 @@ class PostFormTests(TestCase):
             author=cls.user,
             text='Тестовый текст',
             group=cls.group,
+            image=cls.uploaded
         )
 
     @classmethod
@@ -135,11 +136,6 @@ class PostFormTests(TestCase):
         self.assertEqual(edited_post.author, self.post.author)
         self.assertEqual(edited_post.text, form_data['text'])
         self.assertEqual(edited_post.group_id, form_data['group'])
-        # self.assertTrue(
-        #     Post.objects.filter(
-        #         image='posts/small.gif'
-        #     ).exists()
-        # )
 
     def test_guest_post_edit(self):
         group_2 = Group.objects.create(
