@@ -100,7 +100,7 @@ class PostFormTests(TestCase):
         self.assertEqual(created_post.group_id, form_data['group'])
         self.assertEqual(
             created_post.image.name, 'posts/' + form_data['image'].name
-            )
+        )
 
     def test_guest_create_post(self):
         """Гость создаёт пост"""
@@ -198,17 +198,19 @@ class PostFormTests(TestCase):
         """Комментирует авторизованный пользователь"""
         comment_create = Comment.objects.count()
         form_data = {
-                'text': 'Новый комментарий',
-            }
+            'text': 'Новый комментарий',
+        }
         response = self.authorized_client.post(
             reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
             data=form_data,
             follow=True
-            )
+        )
         self.assertEqual(Comment.objects.count(), comment_create + 1)
         self.assertRedirects(response, reverse(
-                'posts:post_detail',
-                kwargs={'post_id': self.post.id}))
+            'posts:post_detail',
+            kwargs={'post_id': self.post.id}
+            )
+        )
 
     def test_add_comment_guest_client(self):
         """Комментирует гость"""
