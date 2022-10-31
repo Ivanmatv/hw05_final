@@ -21,6 +21,7 @@ class PostPagesTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='Ivan')
+        cls.new_author = User.objects.create_user(username='new_author')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -56,12 +57,10 @@ class PostPagesTests(TestCase):
     def setUp(self):
         # Создаём гостя
         self.guest_client = Client()
-        # создаём клиента
+        # Создаём клиента
         self.authorized_client = Client()
         # Авторизуем клиента
         self.authorized_client.force_login(self.user)
-        # Создаём нового автора
-        self.new_author = User.objects.create_user(username='new_author')
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -170,6 +169,7 @@ class PostPagesTests(TestCase):
             'posts:post_detail', kwargs={'post_id': post.id})
         )
         comment_response = response.context['comments'].first()
+        self.assertIn('comments', response.context)
         self.assertEqual(comment_response.text, comment.text)
         self.assertEqual(comment_response.author, comment.author)
 
@@ -183,6 +183,8 @@ class PostPagesTests(TestCase):
         cache.clear()
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertNotEqual(response.content, cache_check)
+        # self.assertEqual(response.content, self.post)
+        # print(response.content)
 
     def test_paginator(self):
         RANGE: int = 11
@@ -215,10 +217,18 @@ class PostPagesTests(TestCase):
     def test_follow(self):
         """Проверка подписки на автора """
         follower_count = Follow.objects.count()
-        self.authorized_client.get(reverse(
+        response = self.authorized_client.get(reverse(
             'posts:profile_follow',
             kwargs={'username': self.new_author}))
         self.assertEqual(Follow.objects.count(), follower_count + 1)
+        form_fields = {
+            'user': forms.fields.ForeignKey,
+            'author': forms.fields.ForeignKey,
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context['form'].fields[value]
+                self.assertIsInstance(form_field, expected)
 
     def test_unfollow(self):
         """Проверка отписки на автора """

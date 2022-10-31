@@ -63,15 +63,15 @@ class PostFormTests(TestCase):
 
     def test_create_post(self):
         post_create = Post.objects.count()
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=self.small_gif,
-            content_type='image/gif'
-        )
+        # uploaded = SimpleUploadedFile(
+        #     name='small.gif',
+        #     content=self.small_gif,
+        #     content_type='image/gif'
+        # )
         form_data = {
             'text': 'Тестовый текст',
             'group': self.group.id,
-            'image': uploaded,
+            'image': self.uploaded,
         }
 
         response = self.authorized_client.post(
@@ -91,6 +91,7 @@ class PostFormTests(TestCase):
         self.assertEqual(created_post.text, form_data['text'])
         self.assertEqual(created_post.group_id, form_data['group'])
         self.assertEqual(created_post.image, form_data['image'])
+        print(response.status_code)
 
     def test_guest_create_post(self):
         post_create = Post.objects.count()
