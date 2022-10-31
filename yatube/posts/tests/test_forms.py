@@ -209,7 +209,7 @@ class PostFormTests(TestCase):
         self.assertRedirects(response, reverse(
             'posts:post_detail',
             kwargs={'post_id': self.post.id}
-            )
+        )
         )
 
     def test_add_comment_guest_client(self):
