@@ -6,7 +6,7 @@
 {%endblock %}
 
 {% block content %}
-{% include 'posts/includes/switcher.html' %}    
+{% include 'posts/includes/switcher.html' with follow=True %}    
   {% for post in page_obj %}
   <article>
     <ul>

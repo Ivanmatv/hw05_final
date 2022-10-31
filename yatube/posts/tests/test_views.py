@@ -176,15 +176,15 @@ class PostPagesTests(TestCase):
     def test_cache_index(self):
         """Проверка хранения и очищения кэша для index."""
         cache.clear()
-        response = self.authorized_client.get(reverse('posts:index'))
-        cache_check = response.content
+        response_1 = self.authorized_client.get(reverse('posts:index'))
+        cache_check = response_1.content
         post = Post.objects.get(id=1)
         post.delete()
+        response_2 = self.authorized_client.get(reverse('posts:index'))
+        self.assertNotEqual(response_2.content, cache_check)
         cache.clear()
-        response = self.authorized_client.get(reverse('posts:index'))
-        self.assertNotEqual(response.content, cache_check)
-        # self.assertEqual(response.content, self.post)
-        # print(response.content)
+        response_3 = self.authorized_client.get(reverse('posts:index'))
+        self.assertNotEqual(response_3.content, cache_check)
 
     def test_paginator(self):
         RANGE: int = 11
@@ -217,18 +217,10 @@ class PostPagesTests(TestCase):
     def test_follow(self):
         """Проверка подписки на автора """
         follower_count = Follow.objects.count()
-        response = self.authorized_client.get(reverse(
+        self.authorized_client.get(reverse(
             'posts:profile_follow',
             kwargs={'username': self.new_author}))
         self.assertEqual(Follow.objects.count(), follower_count + 1)
-        form_fields = {
-            'user': forms.fields.ForeignKey,
-            'author': forms.fields.ForeignKey,
-        }
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context['form'].fields[value]
-                self.assertIsInstance(form_field, expected)
 
     def test_unfollow(self):
         """Проверка отписки на автора """
@@ -238,17 +230,21 @@ class PostPagesTests(TestCase):
         self.assertEqual(Follow.objects.count(), 0)
 
     def test_following_users_corect_content(self):
-        """Проверка отображения новых записей в ленте подписок"""
-        post = Post.objects.create(
-            text=self.post.text,
-            author=self.new_author,
-        )
+        """Новая запись автора появляется в ленте подписчиков
+        и не появляется в ленте тех, кто не подписан
+        """
         follow = Follow.objects.create(
             user=self.user,
             author=self.new_author
         )
+        post = Post.objects.create(
+            text=self.post.text,
+            author=self.new_author,
+        )
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertEqual(response.context['page_obj'][0], post)
+        self.assertIn(post, response.context['page_obj'])
         follow.delete()
         response_2 = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertEqual(len(response_2.context['page_obj']), 0)
+        self.assertIn(post, response.context['page_obj'])
