@@ -53,7 +53,7 @@
           {{ post.text|linebreaksbr }}
         </p>
         {% if post.author == request.user %}
-            <a class="btn btn-primary" hlef="{% url 'posts:post_edit' post.pk %}">Редактировать пост</a>
+            <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">Редактировать пост</a>
         {% endif %} 
       </article>
       {% include 'posts/includes/add_comment.html' %}

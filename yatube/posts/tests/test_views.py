@@ -21,7 +21,7 @@ class PostPagesTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='Ivan')
-        cls.new_author = User.objects.create_user(username='new_author')
+        cls.new_author = User.objects.create_user(username='Igor')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -181,7 +181,7 @@ class PostPagesTests(TestCase):
         post = Post.objects.get(id=1)
         post.delete()
         response_2 = self.authorized_client.get(reverse('posts:index'))
-        self.assertNotEqual(response_2.content, cache_check)
+        self.assertEqual(response_2.content, cache_check)
         cache.clear()
         response_3 = self.authorized_client.get(reverse('posts:index'))
         self.assertNotEqual(response_3.content, cache_check)
@@ -220,7 +220,10 @@ class PostPagesTests(TestCase):
         self.authorized_client.get(reverse(
             'posts:profile_follow',
             kwargs={'username': self.new_author}))
+        follow_obj = Follow.objects.first()
         self.assertEqual(Follow.objects.count(), follower_count + 1)
+        self.assertEqual(follow_obj.author, self.new_author)
+        self.assertEqual(follow_obj.user, self.user)
 
     def test_unfollow(self):
         """Проверка отписки на автора """
@@ -230,21 +233,21 @@ class PostPagesTests(TestCase):
         self.assertEqual(Follow.objects.count(), 0)
 
     def test_following_users_corect_content(self):
-        """Новая запись автора появляется в ленте подписчиков
+        """Новая запись автора появляется в ленте подписчика
         и не появляется в ленте тех, кто не подписан
         """
-        follow = Follow.objects.create(
+        another_user = User.objects.create_user(username='Fedya')
+        another_client = Client()
+        another_client.force_login(another_user)
+        Follow.objects.create(
             user=self.user,
             author=self.new_author
         )
         post = Post.objects.create(
-            text=self.post.text,
+            text='Пост подписки',
             author=self.new_author,
         )
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertEqual(response.context['page_obj'][0], post)
-        self.assertIn(post, response.context['page_obj'])
-        follow.delete()
-        response_2 = self.authorized_client.get(reverse('posts:follow_index'))
-        self.assertEqual(len(response_2.context['page_obj']), 0)
-        self.assertIn(post, response.context['page_obj'])
+        response_another = another_client.get(reverse('posts:follow_index'))
+        self.assertNotEqual(response_another.context['page_obj'], post)
