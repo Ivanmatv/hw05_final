@@ -250,4 +250,4 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertEqual(response.context['page_obj'][0], post)
         response_another = another_client.get(reverse('posts:follow_index'))
-        self.assertNotEqual(response_another.context['page_obj'], post)
+        self.assertNotIn(post, response_another.context['page_obj'])

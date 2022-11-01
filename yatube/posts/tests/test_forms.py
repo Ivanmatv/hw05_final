@@ -32,7 +32,7 @@ class PostFormTests(TestCase):
         cls.comment = Comment.objects.create(
             text='Текст комментария',
             post=cls.post,
-            author=cls.user,
+            author=cls.user_noauthor,
         )
 
     @classmethod
@@ -190,8 +190,6 @@ class PostFormTests(TestCase):
         """Комментирует авторизованный пользователь"""
         comment_create = Comment.objects.count()
         form_data = {
-            'post': self.post,
-            'author': self.user,
             'text': 'Текст комментария',
         }
         response = self.authorized_client.post(
@@ -206,9 +204,9 @@ class PostFormTests(TestCase):
             kwargs={'post_id': self.post.id}
         )
         )
-        self.assertEqual(created_comment.author, form_data['author'])
         self.assertEqual(created_comment.text, form_data['text'])
-        self.assertEqual(created_comment.post, form_data['post'])
+        self.assertEqual(created_comment.author, self.post.author)
+        self.assertEqual(created_comment.post, self.post)
 
     def test_add_comment_guest_client(self):
         """Комментирует гость"""
